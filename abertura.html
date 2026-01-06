@@ -20,16 +20,13 @@
 <div class="card">
     <h2>Farmácias Isoladas</h2>
     <p class="subtitle">Suporte Monitoramento - Abertura de Serviços</p>
-    
     <input type="text" id="javaInput" placeholder="Digite o Código JAVA">
     <button class="btn-search" onclick="buscar()">🔍 Consultar Unidade</button>
-
     <div id="resultBox" class="result-box">
         <strong>📍 Filial:</strong> <span id="resNome"></span><br>
         <strong>🏢 Regional:</strong> <span id="resReg"></span><br>
         <strong>📧 E-mail Loja:</strong> <span id="resEmail"></span>
     </div>
-
     <button id="btnEmail" class="btn-email" onclick="gerarEmail()">📧 Abrir E-mail de Abertura</button>
 </div>
 
@@ -3567,7 +3564,12 @@ lj1845@rd.com.br"
         rawData.split('\n').forEach(linha => {
             const partes = linha.split('|');
             if(partes.length >= 5) {
-                baseLojas[partes[0].trim()] = { nome: partes[1].trim(), regional: partes[2].trim(), emailReg: partes[3].trim(), emailLoja: partes[4].trim() };
+                baseLojas[partes[0].trim()] = { 
+                    nome: partes[1].trim(), 
+                    regional: partes[2].trim(), 
+                    emailReg: partes[3].trim(), 
+                    emailLoja: partes[4].trim() 
+                };
             }
         });
     }
@@ -3589,10 +3591,7 @@ lj1845@rd.com.br"
     function gerarEmail() {
         if (!lojaAtiva) return;
         const hora = new Date().getHours();
-        let saudacao = "Boa noite";
-        if (hora >= 5 && hora < 12) saudacao = "Bom dia";
-        else if (hora >= 12 && hora < 18) saudacao = "Boa tarde";
-        
+        let saudacao = (hora < 12) ? "Bom dia" : (hora < 18 ? "Boa tarde" : "Boa noite");
         const assunto = encodeURIComponent(`Abertura de Serviços - Filial ${lojaAtiva.id} – ${lojaAtiva.nome}`);
         const corpo = `Prezados, ${saudacao}!
 
@@ -3609,7 +3608,7 @@ Suporte Monitoramento`;
         const cc = `${lojaAtiva.emailReg}; suportemonitoramento@rdsaude.com.br`;
         window.location.href = `mailto:${lojaAtiva.emailLoja}?cc=${cc}&subject=${assunto}&body=${encodeURIComponent(corpo)}`;
     }
-    document.getElementById('javaInput').addEventListener('keypress', function(e) { if (e.key === 'Enter') buscar(); });
+    document.getElementById('javaInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') buscar(); });
 </script>
 </body>
 </html>
