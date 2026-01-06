@@ -4,17 +4,14 @@
     <meta charset="UTF-8">
     <title>Farmácias Isoladas - Abertura</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f4f7f9; padding: 20px; display: flex; justify-content: center; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f4f7f9; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 550px; text-align: center; }
         h2 { color: #003366; margin-bottom: 5px; }
         .subtitle { color: #666; font-size: 14px; margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
         input { width: 100%; padding: 15px; margin: 10px 0; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 18px; text-align: center; outline: none; }
-        input:focus { border-color: #003366; }
         button { width: 100%; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 10px; transition: 0.3s; }
         .btn-search { background-color: #003366; color: white; }
-        .btn-search:hover { background-color: #002244; }
         .btn-email { background-color: #007bff; color: white; display: none; margin-top: 25px; }
-        .btn-email:hover { background-color: #0056b3; }
         .result-box { margin-top: 20px; padding: 20px; border-left: 5px solid #003366; background: #f8f9fa; display: none; text-align: left; line-height: 1.6; }
     </style>
 </head>
@@ -3566,53 +3563,37 @@ lj1845@rd.com.br"
 <script>
     const baseLojas = {};
     const rawData = document.getElementById('dadosLojas').textContent.trim();
-    
     if (rawData) {
         rawData.split('\n').forEach(linha => {
             const partes = linha.split('|');
             if(partes.length >= 5) {
-                baseLojas[partes[0].trim()] = { 
-                    nome: partes[1].trim(), 
-                    regional: partes[2].trim(), 
-                    emailReg: partes[3].trim(), 
-                    emailLoja: partes[4].trim() 
-                };
+                baseLojas[partes[0].trim()] = { nome: partes[1].trim(), regional: partes[2].trim(), emailReg: partes[3].trim(), emailLoja: partes[4].trim() };
             }
         });
     }
 
     let lojaAtiva = null;
-
     function buscar() {
         const id = document.getElementById('javaInput').value.trim();
         const d = baseLojas[id];
-
         if (d) {
             lojaAtiva = { id, ...d };
             document.getElementById('resNome').innerText = id + " - " + d.nome;
             document.getElementById('resReg').innerText = d.regional;
             document.getElementById('resEmail').innerText = d.emailLoja;
-            
             document.getElementById('resultBox').style.display = 'block';
             document.getElementById('btnEmail').style.display = 'block';
-        } else {
-            alert("⚠️ Código JAVA não encontrado!");
-            document.getElementById('resultBox').style.display = 'none';
-            document.getElementById('btnEmail').style.display = 'none';
-        }
+        } else { alert("⚠️ Código JAVA não encontrado!"); }
     }
 
     function gerarEmail() {
         if (!lojaAtiva) return;
-
         const hora = new Date().getHours();
         let saudacao = "Boa noite";
         if (hora >= 5 && hora < 12) saudacao = "Bom dia";
         else if (hora >= 12 && hora < 18) saudacao = "Boa tarde";
         
         const assunto = encodeURIComponent(`Abertura de Serviços - Filial ${lojaAtiva.id} – ${lojaAtiva.nome}`);
-        
-        // Novo texto solicitado
         const corpo = `Prezados, ${saudacao}!
 
 Envio este e-mail para informar que os serviços da filial ${lojaAtiva.id} – ${lojaAtiva.nome} foram Abertos.
@@ -3626,14 +3607,9 @@ Atenciosamente,
 Suporte Monitoramento`;
 
         const cc = `${lojaAtiva.emailReg}; suportemonitoramento@rdsaude.com.br`;
-        
         window.location.href = `mailto:${lojaAtiva.emailLoja}?cc=${cc}&subject=${assunto}&body=${encodeURIComponent(corpo)}`;
     }
-
-    document.getElementById('javaInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') buscar();
-    });
+    document.getElementById('javaInput').addEventListener('keypress', function(e) { if (e.key === 'Enter') buscar(); });
 </script>
-
 </body>
 </html>
