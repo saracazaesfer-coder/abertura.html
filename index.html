@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Farmácias Isoladas - Abertura</title>
+    <title>Farmácias Isoladas - Reabertura</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; background-color: #f4f7f9; padding: 20px; display: flex; justify-content: center; }
         .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 550px; text-align: center; }
@@ -13,8 +13,8 @@
         button { width: 100%; padding: 15px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 10px; transition: 0.3s; }
         .btn-search { background-color: #003366; color: white; }
         .btn-search:hover { background-color: #002244; }
-        .btn-email { background-color: #007bff; color: white; display: none; margin-top: 25px; }
-        .btn-email:hover { background-color: #0056b3; }
+        .btn-email { background-color: #28a745; color: white; display: none; margin-top: 25px; }
+        .btn-email:hover { background-color: #218838; }
         .result-box { margin-top: 20px; padding: 20px; border-left: 5px solid #003366; background: #f8f9fa; display: none; text-align: left; line-height: 1.6; }
     </style>
 </head>
@@ -22,7 +22,7 @@
 
 <div class="card">
     <h2>Farmácias Isoladas</h2>
-    <p class="subtitle">Suporte Monitoramento - Abertura de Serviços</p>
+    <p class="subtitle">Suporte Monitoramento - Reabertura de Filiais</p>
     
     <input type="text" id="javaInput" placeholder="Digite o Código JAVA">
     <button class="btn-search" onclick="buscar()">🔍 Consultar Unidade</button>
@@ -33,7 +33,7 @@
         <strong>📧 E-mail Loja:</strong> <span id="resEmail"></span>
     </div>
 
-    <button id="btnEmail" class="btn-email" onclick="gerarEmail()">📧 Abrir E-mail de Abertura</button>
+    <button id="idBtnEmail" class="btn-email" onclick="gerarEmail()">📧 Abrir E-mail de Reabertura</button>
 </div>
 
 <script id="dadosLojas" type="text/plain">
@@ -3564,75 +3564,57 @@ lj1845@rd.com.br"
 </script>
 
 <script>
-    const baseLojas = {};
-    const rawData = document.getElementById('dadosLojas').textContent.trim();
-    
-    if (rawData) {
-        rawData.split('\n').forEach(linha => {
-            const partes = linha.split('|');
-            if(partes.length >= 5) {
-                baseLojas[partes[0].trim()] = { 
-                    nome: partes[1].trim(), 
-                    regional: partes[2].trim(), 
-                    emailReg: partes[3].trim(), 
-                    emailLoja: partes[4].trim() 
-                };
-            }
-        });
-    }
-
-    let lojaAtiva = null;
+    let lojaEncontrada = null;
 
     function buscar() {
-        const id = document.getElementById('javaInput').value.trim();
-        const d = baseLojas[id];
+        const input = document.getElementById('javaInput').value.trim();
+        const dadosRaw = document.getElementById('dadosLojas').textContent.trim().split('\n');
+        const resultBox = document.getElementById('resultBox');
+        const btnEmail = document.getElementById('idBtnEmail');
 
-        if (d) {
-            lojaAtiva = { id, ...d };
-            document.getElementById('resNome').innerText = id + " - " + d.nome;
-            document.getElementById('resReg').innerText = d.regional;
-            document.getElementById('resEmail').innerText = d.emailLoja;
-            
-            document.getElementById('resultBox').style.display = 'block';
-            document.getElementById('btnEmail').style.display = 'block';
+        lojaEncontrada = null;
+
+        for (let linha of dadosRaw) {
+            const [id, nome, regional, emailReg, emailLoja] = linha.split('|');
+            if (id === input) {
+                lojaEncontrada = { id, nome, regional, emailLoja };
+                break;
+            }
+        }
+
+        if (lojaEncontrada) {
+            document.getElementById('resNome').textContent = lojaEncontrada.nome;
+            document.getElementById('resReg').textContent = lojaEncontrada.regional;
+            document.getElementById('resEmail').textContent = lojaEncontrada.emailLoja;
+            resultBox.style.display = 'block';
+            btnEmail.style.display = 'block';
         } else {
-            alert("⚠️ Código JAVA não encontrado!");
-            document.getElementById('resultBox').style.display = 'none';
-            document.getElementById('btnEmail').style.display = 'none';
+            alert('Filial não encontrada!');
+            resultBox.style.display = 'none';
+            btnEmail.style.display = 'none';
         }
     }
 
     function gerarEmail() {
-        if (!lojaAtiva) return;
+        if (!lojaEncontrada) return;
 
-        const hora = new Date().getHours();
-        let saudacao = "Boa noite";
-        if (hora >= 5 && hora < 12) saudacao = "Bom dia";
-        else if (hora >= 12 && hora < 18) saudacao = "Boa tarde";
+        const agora = new Date();
+        const hora = agora.getHours();
+        const saudacao = (hora < 12) ? "Bom dia" : "Boa tarde";
+
+        const destinatario = lojaEncontrada.emailLoja;
+        const assunto = `Reabertura de Serviços - Filial ${lojaEncontrada.id} - ${lojaEncontrada.nome}`;
         
-        const assunto = encodeURIComponent(`Abertura de Serviços - Filial ${lojaAtiva.id} – ${lojaAtiva.nome}`);
-        
-        // Novo texto solicitado
-        const corpo = `Prezados, ${saudacao}!
+        const corpo = `Prezados, ${saudacao}.\n\n` +
+            `Informamos que os serviços da filial ${lojaEncontrada.nome} já se encontram abertos.\n\n` +
+            `Reforçamos que a abertura ou o fechamento de serviços deve ser realizada exclusivamente por meio do chat de Suporte de loja.\n\n` +
+            `Em caso de dúvidas, permanecemos à disposição pelos canais de suporte à loja, disponíveis 24 horas por dia, todos os dias, via chat, no link abaixo:\n` +
+            `https://grupordprod.service-now.com/esc\n\n` +
+            `Atenciosamente,`;
 
-Envio este e-mail para informar que os serviços da filial ${lojaAtiva.id} – ${lojaAtiva.nome} foram Abertos.
-
-Abertura ou fechamento de serviços através do chat
-
-Qualquer dúvida, seguimos à disposição nos canais de suporte a loja via chat todos os dias 24 horas.
-https://grupordprod.service-now.com/esc 
-
-Atenciosamente,
-Suporte Monitoramento`;
-
-        const cc = `${lojaAtiva.emailReg}; suportemonitoramento@rdsaude.com.br`;
-        
-        window.location.href = `mailto:${lojaAtiva.emailLoja}?cc=${cc}&subject=${assunto}&body=${encodeURIComponent(corpo)}`;
+        const mailtoLink = `mailto:${destinatario}?subject=${encodeURIComponent(assunto)}&body=${encodeURIComponent(corpo)}`;
+        window.location.href = mailtoLink;
     }
-
-    document.getElementById('javaInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') buscar();
-    });
 </script>
 
 </body>
